@@ -81,6 +81,9 @@ body::before {
   z-index: 0;
 }
 
+<link rel="stylesheet" href="alpha-enhancements.css">
+
+  
 /* ═══════════════════════════════
    WRAPPER
 ═══════════════════════════════ */
@@ -193,6 +196,7 @@ body::before {
   font-size: 13.5px;
   margin-bottom: 28px;
 }
+
 
 /* ── پیشرفت کلی ── */
 .overall-progress {
@@ -675,7 +679,7 @@ body::before {
 }
 </style>
 </head>
-
+<script src="alpha-enhancements.js"></script>
 <body>
 
 <div class="sticky-bar"><div class="sticky-fill" id="stickyFill"></div></div>
@@ -695,12 +699,110 @@ body::before {
   <h1>نقشه راه ساخت <span>آلفا</span> — از صفر</h1>
   <p class="hero-desc">۶ فاز، از هسته شخصیت تا روح دیجیتال — هر فاز رو بزن تا جزئیاتش باز بشه</p>
 
+  <div class="phase-info-box">
+  <div class="info-stat">
+    <div class="info-stat-label">MEMORY</div>
+    <div class="info-stat-value">ONLINE</div>
+  </div>
+
+  <div class="info-stat">
+    <div class="info-stat-label">VOICE</div>
+    <div class="info-stat-value">READY</div>
+  </div>
+
+  <div class="info-stat">
+    <div class="info-stat-label">CORE</div>
+    <div class="info-stat-value">ACTIVE</div>
+  </div>
+
+  <div class="info-stat">
+    <div class="info-stat-label">VERSION</div>
+    <div class="info-stat-value">v2.0</div>
+  </div>
+</div>
+
+
   <div class="overall-progress">
     <span>پیشرفت کلی</span>
     <div class="overall-bar"><div class="overall-fill"></div></div>
     <span style="color: var(--p1); font-family: 'Space Mono', monospace; font-size: 11px;">فاز ۱ فعال</span>
   </div>
 </div>
+
+
+<div class="phase open">
+
+  <div class="phase-header">
+
+    <div class="num">SYS</div>
+
+    <div class="phase-main">
+      <div class="phase-title">
+        Alpha Core Dashboard
+      </div>
+
+      <div class="phase-subtitle">
+        System Overview
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="section">
+
+    <div class="item">
+      <div class="dot-wrap">
+        <div class="dot c1"></div>
+      </div>
+
+      <div class="item-content">
+        <div class="item-text">
+          Build Status
+        </div>
+
+        <div class="item-note">
+          فاز ۱ فعال — طراحی هسته شخصیت
+        </div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="dot-wrap">
+        <div class="dot c2"></div>
+      </div>
+
+      <div class="item-content">
+        <div class="item-text">
+          Memory Engine
+        </div>
+
+        <div class="item-note">
+          در حال توسعه
+        </div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="dot-wrap">
+        <div class="dot c3"></div>
+      </div>
+
+      <div class="item-content">
+        <div class="item-text">
+          Voice Engine
+        </div>
+
+        <div class="item-note">
+          عملیاتی
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
 
 <!-- ══ PHASES ══ -->
 <div class="phases">
@@ -1646,6 +1748,82 @@ body::before {
   </div>
 
 </div><!-- /phases -->
+
+<div class="phase open">
+
+  <div class="phase-header">
+
+    <div class="num">AI</div>
+
+    <div class="phase-main">
+      <div class="phase-title">
+        وضعیت فعلی آلفا
+      </div>
+
+      <div class="phase-subtitle">
+        Alpha Core Status
+      </div>
+    </div>
+
+    <div class="phase-count">
+      LIVE
+    </div>
+
+  </div>
+
+  <div class="section">
+
+    <div class="item">
+      <div class="dot-wrap">
+        <div class="dot c1"></div>
+      </div>
+
+      <div class="item-content">
+        <div class="item-text">
+          هسته شخصیت در حال توسعه است
+        </div>
+
+        <div class="item-note">
+          هدف فعلی: تکمیل فاز اول و ساخت سیستم حافظه
+        </div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="dot-wrap">
+        <div class="dot c2"></div>
+      </div>
+
+      <div class="item-content">
+        <div class="item-text">
+          وضعیت صدا: آماده
+        </div>
+
+        <div class="item-note">
+          موتور تشخیص گفتار متصل است
+        </div>
+      </div>
+    </div>
+
+    <div class="item">
+      <div class="dot-wrap">
+        <div class="dot c5"></div>
+      </div>
+
+      <div class="item-content">
+        <div class="item-text">
+          پیام آلفا
+        </div>
+
+        <div class="item-note">
+          «من هنوز حافظه بلندمدت ندارم... ولی هر روز کامل‌تر می‌شوم.»
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
 
 <!-- ══ FOOTER ══ -->
 <div class="footer">
