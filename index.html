@@ -5,531 +5,1680 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>نقشه راه آلفا</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
-  :root {
-    --bg:       #08080C;
-    --bg2:      #0F0F15;
-    --bg3:      #16161F;
-    --border:   #1E1E2A;
-    --text:     #C8C8D8;
-    --muted:    #555566;
-    --p1:       #6BCB77;
-    --p2:       #4D96FF;
-    --p3:       #FFD93D;
-    --p4:       #FF6B6B;
-    --p5:       #C77DFF;
-    --p6:       #FF9A3C;
-  }
+:root {
+  --bg:        #050508;
+  --bg2:       #0A0A10;
+  --bg3:       #0F0F18;
+  --bg4:       #141420;
+  --border:    #1A1A28;
+  --border2:   #252535;
+  --text:      #D0D0E8;
+  --muted:     #484860;
+  --muted2:    #606078;
+  --p1:        #39FF7A;
+  --p2:        #3D8EFF;
+  --p3:        #FFD93D;
+  --p4:        #FF4D6A;
+  --p5:        #BF5FFF;
+  --p6:        #FF7A1A;
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  --glow1: 0 0 20px rgba(57,255,122,0.3);
+  --glow2: 0 0 20px rgba(61,142,255,0.3);
+  --glow3: 0 0 20px rgba(255,217,61,0.3);
+  --glow4: 0 0 20px rgba(255,77,106,0.3);
+  --glow5: 0 0 20px rgba(191,95,255,0.3);
+  --glow6: 0 0 20px rgba(255,122,26,0.3);
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Vazirmatn', Tahoma, sans-serif;
-    min-height: 100vh;
-    padding: 32px 20px 60px;
-    max-width: 780px;
-    margin: 0 auto;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── هدر ── */
-  .hero {
-    text-align: center;
-    padding: 40px 0 48px;
-    position: relative;
-  }
-  .hero::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 120px; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--p3), transparent);
-  }
-  .hero-emoji { font-size: 52px; display: block; margin-bottom: 12px; }
-  .hero h1 {
-    font-size: 28px;
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: -0.5px;
-    margin-bottom: 8px;
-  }
-  .hero p { color: var(--muted); font-size: 14px; }
+html { scroll-behavior: smooth; }
 
-  /* ── فازها ── */
-  .phases { margin-top: 40px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Vazirmatn', Tahoma, sans-serif;
+  min-height: 100vh;
+  padding: 0 0 80px;
+  overflow-x: hidden;
+}
 
-  .phase {
-    margin-bottom: 12px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .phase:hover { border-color: #2E2E3E; }
+/* ═══════════════════════════════
+   SCANLINE OVERLAY
+═══════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.07) 2px,
+    rgba(0,0,0,0.07) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
 
-  .phase-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 20px;
-    cursor: pointer;
-    background: var(--bg2);
-    user-select: none;
-    transition: background 0.15s;
-  }
-  .phase-header:hover { background: var(--bg3); }
+/* ═══════════════════════════════
+   GRID BACKGROUND
+═══════════════════════════════ */
+.grid-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-image:
+    linear-gradient(rgba(61,142,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(61,142,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
 
-  .num {
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 15px;
-    flex-shrink: 0;
-    color: #000;
-  }
+/* ═══════════════════════════════
+   WRAPPER
+═══════════════════════════════ */
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
 
-  .phase-info { flex: 1; }
-  .phase-title { font-size: 15px; font-weight: 700; color: #fff; }
-  .phase-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+/* ═══════════════════════════════
+   HERO
+═══════════════════════════════ */
+.hero {
+  text-align: center;
+  padding: 60px 0 64px;
+  position: relative;
+}
 
-  .phase-meta {
-    display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
-  }
-  .tag {
-    font-size: 11px;
-    padding: 2px 10px;
-    border-radius: 20px;
-    background: rgba(255,255,255,0.07);
-    color: var(--muted);
-  }
-  .chevron {
-    font-size: 12px; color: var(--muted);
-    transition: transform 0.25s;
-  }
-  .phase.open .chevron { transform: rotate(180deg); }
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(57,255,122,0.06);
+  border: 1px solid rgba(57,255,122,0.2);
+  border-radius: 30px;
+  padding: 5px 16px;
+  font-size: 11px;
+  color: var(--p1);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 1px;
+  margin-bottom: 28px;
+  animation: badge-pulse 3s ease-in-out infinite;
+}
 
-  /* ── بدنه ── */
-  .phase-body {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
-    background: var(--bg);
-  }
-  .phase.open .phase-body { max-height: 2000px; }
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(57,255,122,0.15); }
+  50% { box-shadow: 0 0 0 8px rgba(57,255,122,0); }
+}
 
-  .section {
-    padding: 20px 20px 4px;
-    border-bottom: 1px solid var(--border);
-  }
-  .section:last-child { border-bottom: none; padding-bottom: 20px; }
+.hero-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--p1);
+  box-shadow: 0 0 8px var(--p1);
+  animation: dot-blink 1.5s ease-in-out infinite;
+}
 
-  .section-title {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
+@keyframes dot-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
 
-  .item {
-    display: flex;
-    gap: 12px;
-    padding: 9px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.03);
-    font-size: 13.5px;
-    line-height: 1.6;
-  }
-  .item:last-child { border-bottom: none; }
+.hero-icon-wrap {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
 
-  .dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    margin-top: 7px;
-    flex-shrink: 0;
-  }
+.hero-icon {
+  font-size: 64px;
+  display: block;
+  filter: drop-shadow(0 0 24px rgba(61,142,255,0.5));
+  animation: icon-float 4s ease-in-out infinite;
+}
 
-  .item-text { flex: 1; }
-  .item-note {
-    font-size: 11.5px;
-    color: var(--muted);
-    margin-top: 3px;
-  }
+@keyframes icon-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
 
-  .lib {
-    display: inline-block;
-    font-size: 11px;
-    padding: 1px 8px;
-    border-radius: 5px;
-    background: rgba(255,255,255,0.06);
-    color: #aaa;
-    margin: 2px 2px 0 0;
-    font-family: monospace;
-  }
+.hero-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  border: 1px solid rgba(61,142,255,0.2);
+  animation: ring-expand 3s ease-out infinite;
+}
 
-  /* ── خط پیشرفت ── */
-  .progress-bar {
-    height: 3px;
-    border-radius: 2px;
-    margin-top: 6px;
-    background: var(--border);
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.6s ease;
-  }
+.hero-ring:nth-child(2) { animation-delay: 1s; }
+.hero-ring:nth-child(3) { animation-delay: 2s; }
 
-  /* ── رنگ فازها ── */
-  .c1 { background: var(--p1); }
-  .c2 { background: var(--p2); }
-  .c3 { background: var(--p3); }
-  .c4 { background: var(--p4); }
-  .c5 { background: var(--p5); }
-  .c6 { background: var(--p6); }
+@keyframes ring-expand {
+  0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
 
-  .t1 { color: var(--p1); }
-  .t2 { color: var(--p2); }
-  .t3 { color: var(--p3); }
-  .t4 { color: var(--p4); }
-  .t5 { color: var(--p5); }
-  .t6 { color: var(--p6); }
+.hero h1 {
+  font-size: 32px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
 
-  /* ── فوتر ── */
-  .footer {
-    text-align: center;
-    margin-top: 48px;
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 2;
-  }
+.hero h1 span {
+  background: linear-gradient(135deg, var(--p2), var(--p5));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-desc {
+  color: var(--muted2);
+  font-size: 13.5px;
+  margin-bottom: 28px;
+}
+
+/* ── پیشرفت کلی ── */
+.overall-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 12px;
+  color: var(--muted2);
+}
+
+.overall-bar {
+  width: 120px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.overall-fill {
+  height: 100%;
+  width: 8%;
+  background: linear-gradient(90deg, var(--p1), var(--p2));
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(57,255,122,0.6);
+  animation: progress-glow 2s ease-in-out infinite;
+}
+
+@keyframes progress-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(57,255,122,0.6); }
+  50% { box-shadow: 0 0 16px rgba(57,255,122,0.9); }
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 200px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--p3), transparent);
+}
+
+/* ═══════════════════════════════
+   PHASES
+═══════════════════════════════ */
+.phases { margin-top: 32px; display: flex; flex-direction: column; gap: 10px; }
+
+.phase {
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+}
+
+.phase::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.phase.open::before { opacity: 1; }
+
+.ph1::before { background: var(--p1); box-shadow: var(--glow1); }
+.ph2::before { background: var(--p2); box-shadow: var(--glow2); }
+.ph3::before { background: var(--p3); box-shadow: var(--glow3); }
+.ph4::before { background: var(--p4); box-shadow: var(--glow4); }
+.ph5::before { background: var(--p5); box-shadow: var(--glow5); }
+.ph6::before { background: var(--p6); box-shadow: var(--glow6); }
+
+.phase:hover { border-color: var(--border2); }
+.phase.open { border-color: var(--border2); }
+
+/* Phase header */
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  cursor: pointer;
+  background: var(--bg2);
+  user-select: none;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.phase-header:hover { background: var(--bg3); }
+.phase.open .phase-header { background: var(--bg3); }
+
+.num {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 900; font-size: 15px;
+  font-family: 'Space Mono', monospace;
+  flex-shrink: 0;
+  color: #000;
+  position: relative;
+  transition: box-shadow 0.3s;
+}
+
+.phase.open .num {
+  box-shadow: 0 0 20px currentColor;
+}
+
+.num::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 14px;
+  border: 1px solid currentColor;
+  opacity: 0.2;
+}
+
+.phase-info { flex: 1; min-width: 0; }
+.phase-title { font-size: 15px; font-weight: 700; color: #fff; }
+.phase-subtitle { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+.phase-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.tag {
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+  color: var(--muted2);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.phase-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+}
+
+.mini-bar {
+  width: 50px; height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mini-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.chevron {
+  font-size: 11px;
+  color: var(--muted);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  margin-right: 4px;
+}
+.phase.open .chevron { transform: rotate(180deg); }
+
+/* Phase body */
+.phase-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+  background: var(--bg);
+}
+.phase.open .phase-body { max-height: 6000px; }
+
+/* Section */
+.section {
+  padding: 22px 22px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  position: relative;
+}
+.section:last-child { border-bottom: none; padding-bottom: 22px; }
+
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Space Mono', monospace;
+}
+
+.section-title .s-icon {
+  font-size: 14px;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent);
+}
+
+/* Items */
+.item {
+  display: flex;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.025);
+  font-size: 13.5px;
+  line-height: 1.65;
+  transition: background 0.15s;
+  border-radius: 6px;
+  padding-right: 8px;
+  padding-left: 8px;
+}
+
+.item:hover {
+  background: rgba(255,255,255,0.025);
+}
+
+.item:last-child { border-bottom: none; }
+
+.dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding-top: 6px;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  transition: box-shadow 0.3s;
+}
+
+.item:hover .dot {
+  box-shadow: 0 0 10px currentColor;
+}
+
+.item-content { flex: 1; min-width: 0; }
+.item-text { color: var(--text); }
+
+.item-note {
+  font-size: 12px;
+  color: var(--muted2);
+  margin-top: 4px;
+  padding: 5px 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 6px;
+  border-right: 2px solid rgba(255,255,255,0.06);
+  line-height: 1.7;
+}
+
+.item-note strong {
+  color: var(--muted2);
+  font-weight: 600;
+}
+
+/* Library tags */
+.lib {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.06);
+  color: #b0b0cc;
+  margin: 2px 2px 0 0;
+  font-family: 'Space Mono', monospace;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.2s, color 0.2s;
+}
+
+.lib:hover {
+  background: rgba(255,255,255,0.1);
+  color: #d0d0ee;
+}
+
+/* Status chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-family: 'Space Mono', monospace;
+  border: 1px solid;
+  margin-top: 5px;
+}
+
+.chip-done { background: rgba(57,255,122,0.07); color: var(--p1); border-color: rgba(57,255,122,0.2); }
+.chip-todo { background: rgba(96,96,120,0.12); color: var(--muted2); border-color: rgba(96,96,120,0.2); }
+.chip-hard { background: rgba(255,77,106,0.07); color: var(--p4); border-color: rgba(255,77,106,0.2); }
+.chip-tip  { background: rgba(255,217,61,0.07); color: var(--p3); border-color: rgba(255,217,61,0.2); }
+
+/* Phase info box */
+.phase-info-box {
+  margin: 0 22px 16px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.info-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.info-stat-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.info-stat-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Colors */
+.c1 { background: var(--p1); color: var(--p1); }
+.c2 { background: var(--p2); color: var(--p2); }
+.c3 { background: var(--p3); color: var(--p3); }
+.c4 { background: var(--p4); color: var(--p4); }
+.c5 { background: var(--p5); color: var(--p5); }
+.c6 { background: var(--p6); color: var(--p6); }
+
+.num.c1 { color: #000; }
+.num.c2 { color: #000; }
+.num.c3 { color: #000; }
+.num.c4 { color: #000; }
+.num.c5 { color: #000; }
+.num.c6 { color: #000; }
+
+.dot.c1 { background: var(--p1); color: var(--p1); }
+.dot.c2 { background: var(--p2); color: var(--p2); }
+.dot.c3 { background: var(--p3); color: var(--p3); }
+.dot.c4 { background: var(--p4); color: var(--p4); }
+.dot.c5 { background: var(--p5); color: var(--p5); }
+.dot.c6 { background: var(--p6); color: var(--p6); }
+
+.t1 { color: var(--p1); }
+.t2 { color: var(--p2); }
+.t3 { color: var(--p3); }
+.t4 { color: var(--p4); }
+.t5 { color: var(--p5); }
+.t6 { color: var(--p6); }
+
+/* ═══════════════════════════════
+   FOOTER
+═══════════════════════════════ */
+.footer {
+  text-align: center;
+  margin-top: 56px;
+  padding: 32px 20px;
+  border-top: 1px solid var(--border);
+  position: relative;
+}
+
+.footer-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(57,255,122,0.05);
+  border: 1px solid rgba(57,255,122,0.15);
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 12.5px;
+  color: var(--p1);
+  font-family: 'Space Mono', monospace;
+  margin-bottom: 14px;
+}
+
+.footer-status::before {
+  content: '';
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--p1);
+  box-shadow: 0 0 10px var(--p1);
+  animation: dot-blink 1.5s ease-in-out infinite;
+}
+
+.footer-credit {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* ═══════════════════════════════
+   ENTRY ANIMATIONS
+═══════════════════════════════ */
+.phase {
+  animation: phase-in 0.4s ease backwards;
+}
+
+@keyframes phase-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.phase:nth-child(1) { animation-delay: 0.1s; }
+.phase:nth-child(2) { animation-delay: 0.2s; }
+.phase:nth-child(3) { animation-delay: 0.3s; }
+.phase:nth-child(4) { animation-delay: 0.4s; }
+.phase:nth-child(5) { animation-delay: 0.5s; }
+.phase:nth-child(6) { animation-delay: 0.6s; }
+
+/* ═══════════════════════════════
+   RESPONSIVE
+═══════════════════════════════ */
+@media (max-width: 520px) {
+  .hero h1 { font-size: 24px; }
+  .phase-info-box { flex-direction: column; gap: 12px; }
+  .phase-header { padding: 14px 16px; }
+  .section { padding: 16px 16px 6px; }
+}
+
+/* ── Glitch effect on hover for title ── */
+.hero h1:hover {
+  animation: glitch 0.3s;
+}
+
+@keyframes glitch {
+  0%   { text-shadow: 2px 0 var(--p4), -2px 0 var(--p2); }
+  25%  { text-shadow: -2px 0 var(--p4), 2px 0 var(--p2); }
+  50%  { text-shadow: 2px 2px var(--p5), -2px -2px var(--p1); }
+  75%  { text-shadow: -1px 0 var(--p3), 1px 0 var(--p6); }
+  100% { text-shadow: none; }
+}
+
+/* ── Collapse indicator ── */
+.phase-count {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  background: var(--bg4);
+  border-radius: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+}
+
+/* ── Sticky progress bar ── */
+.sticky-bar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  z-index: 1000;
+}
+
+.sticky-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--p1), var(--p2), var(--p5));
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(61,142,255,0.8);
+}
 </style>
 </head>
 <body>
 
+<div class="sticky-bar"><div class="sticky-fill" id="stickyFill"></div></div>
+<div class="grid-bg"></div>
+
+<div class="wrapper">
+
+<!-- ══ HERO ══ -->
 <div class="hero">
-  <span class="hero-emoji">🤖</span>
-  <h1>نقشه راه ساخت آلفا — از صفر</h1>
-  <p>هر فاز رو بزن تا جزئیاتش باز بشه</p>
+  <div class="hero-badge">ALPHA · BUILD LOG · v2.0</div>
+  <div class="hero-icon-wrap">
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <span class="hero-icon">🤖</span>
+  </div>
+  <h1>نقشه راه ساخت <span>آلفا</span> — از صفر</h1>
+  <p class="hero-desc">۶ فاز، از هسته شخصیت تا روح دیجیتال — هر فاز رو بزن تا جزئیاتش باز بشه</p>
+
+  <div class="overall-progress">
+    <span>پیشرفت کلی</span>
+    <div class="overall-bar"><div class="overall-fill"></div></div>
+    <span style="color: var(--p1); font-family: 'Space Mono', monospace; font-size: 11px;">فاز ۱ فعال</span>
+  </div>
 </div>
 
+<!-- ══ PHASES ══ -->
 <div class="phases">
 
   <!-- ══ فاز ۱ ══ -->
-  <div class="phase open" id="ph1">
+  <div class="phase ph1 open" id="ph1">
     <div class="phase-header" onclick="toggle('ph1')">
-      <div class="num c1">۱</div>
+      <div class="num c1" style="background: var(--p1);">۱</div>
       <div class="phase-info">
-        <div class="phase-title">مغز — هسته شخصیت</div>
-        <div class="phase-subtitle">ساختار اصلی برنامه و سیستم احساسی</div>
+        <div class="phase-title">🧠 مغز — هسته شخصیت</div>
+        <div class="phase-subtitle">ساختار اصلی برنامه، سیستم احساسی، و رفتار بیکار</div>
       </div>
       <div class="phase-meta">
         <span class="tag">Python · پایه</span>
+        <div class="phase-progress">
+          <div class="mini-bar"><div class="mini-fill c1" style="width: 20%; background: var(--p1);"></div></div>
+          <span>۲۰٪</span>
+        </div>
         <span class="chevron">▼</span>
       </div>
     </div>
     <div class="phase-body">
 
-      <div class="section">
-        <div class="section-title t1">۱.۱ — ساختار کلاس‌ها</div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">ساخت کلاس <span class="lib">AlphaCore</span> به عنوان قلب برنامه<div class="item-note">همه چیز از اینجا شروع میشه — مثل مغز آلفا</div></div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">کلاس <span class="lib">AlphaPersonality</span> برای مدیریت شخصیت و احساسات</div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">کلاس <span class="lib">AlphaMemory</span> برای حافظه و یادگیری</div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">کلاس <span class="lib">CommandParser</span> برای فهمیدن دستورات</div></div>
+      <div class="phase-info-box">
+        <div class="info-stat">
+          <span class="info-stat-label">تخمین زمان</span>
+          <span class="info-stat-value">۳–۵ روز</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وابستگی</span>
+          <span class="info-stat-value">هیچی — اول شروع کن</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">فایل اصلی</span>
+          <span class="info-stat-value" style="font-family: 'Space Mono', monospace; font-size: 12px;">alpha_core.py</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وضعیت</span>
+          <span class="info-stat-value"><span class="chip chip-done">● در حال اجرا</span></span>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t1">۱.۲ — سیستم حالت‌های احساسی</div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">تعریف حالت‌ها: خوشحال، آروم، خواب‌آلود، کنجکاو، شوخ، متمرکز، غمگین</div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">هر حالت یه رنگ، emoji، و سطح انرژی داره</div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">ساعت روی حالت تأثیر میذاره: شب → خواب‌آلود، صبح → شاد</div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">تعامل با کاربر روی حالت تأثیر میذاره: بعد از صحبت → پر انرژی‌تر</div></div>
+        <div class="section-title t1"><span class="s-icon">⚙️</span>۱.۱ — ساختار کلاس‌ها</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">کلاس <span class="lib">AlphaCore</span> — قلب سیستم</div>
+            <div class="item-note">همه ماژول‌ها از طریق این کلاس با هم ارتباط دارن. مثل یه bus مرکزی عمل میکنه. هر چیزی که اتفاق میفته از اینجا رد میشه.</div>
+            <span class="chip chip-done">● شروع شده</span>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">کلاس <span class="lib">AlphaPersonality</span> — مدیریت شخصیت و احساسات</div>
+            <div class="item-note">شامل: state فعلی، تاریخچه state‌ها، متد <span class="lib">transition()</span> برای تغییر حالت با دلیل، و متد <span class="lib">get_response_style()</span></div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">کلاس <span class="lib">AlphaMemory</span> — حافظه و یادگیری</div>
+            <div class="item-note">حافظه کوتاه‌مدت (آخر ۲۰ پیام) + حافظه بلندمدت (فایل JSON). متد <span class="lib">remember(key, value)</span> و <span class="lib">recall(key)</span></div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">کلاس <span class="lib">CommandParser</span> — پارس کردن دستورات</div>
+            <div class="item-note">اول intent رو تشخیص بده، بعد entity استخراج کن. مثلاً «صدا رو ۵۰ کن» → intent: set_volume, entity: 50</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">کلاس <span class="lib">AlphaConfig</span> — تمام تنظیمات در یه جا</div>
+            <div class="item-note">فایل <span class="lib">config.json</span> — اسم، صدا، زبان، رنگ‌ها، threshold‌ها. هیچ چیزی hardcode نباشه.</div>
+            <span class="chip chip-tip">💡 از اول بساز، بعداً سر درد کمتری داری</span>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t1">۱.۳ — سیستم پاسخ‌ها</div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">برای هر موضوع (سلام، تشکر، خداحافظ...) چند پاسخ مختلف بنویسه</div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">هر پاسخ برای هر حالت احساسی جداگانه باشه<div class="item-note">آلفای خواب‌آلود با آلفای شاد فرق داره</div></div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">انتخاب تصادفی پاسخ از بین گزینه‌ها با <span class="lib">random.choice</span></div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">سیستم تکرار نشدن: پاسخ قبلی رو نگه دار تا دوباره نگه</div></div>
+        <div class="section-title t1"><span class="s-icon">💫</span>۱.۲ — سیستم حالت‌های احساسی</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">۷ حالت اصلی با ویژگی‌های کامل</div>
+            <div class="item-note">
+              <strong>خوشحال 😊</strong> — انرژی: ۸۰، رنگ: سبز، پاسخ: پرانرژی و شوخ<br>
+              <strong>آروم 😌</strong> — انرژی: ۵۰، رنگ: آبی، پاسخ: مؤدب و آرام<br>
+              <strong>خواب‌آلود 😴</strong> — انرژی: ۲۰، رنگ: بنفش تیره، پاسخ: کوتاه و کُند<br>
+              <strong>کنجکاو 🤔</strong> — انرژی: ۷۰، رنگ: زرد، پاسخ: سوال‌پرسنده<br>
+              <strong>متمرکز 🎯</strong> — انرژی: ۹۰، رنگ: سفید، پاسخ: مختصر و دقیق<br>
+              <strong>شوخ 😏</strong> — انرژی: ۶۵، رنگ: نارنجی، پاسخ: طناز<br>
+              <strong>ناراحت 😟</strong> — انرژی: ۳۰، رنگ: قرمز تیره، پاسخ: کم‌حرف
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">تغییر حالت بر اساس ساعت روز</div>
+            <div class="item-note">۶–۱۰ صبح → شاد/کنجکاو | ۱۰–۱۸ → متمرکز/آروم | ۱۸–۲۳ → شوخ/راحت | ۲۳–۶ → خواب‌آلود | احتمال ۲۰٪ برای تغییر تصادفی</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">تعامل با کاربر روی حالت تأثیر میذاره</div>
+            <div class="item-note">هر پیام دریافتی: <span class="lib">+5 energy</span> | تشکر/تعریف: <span class="lib">→ happy</span> | دستور خشک: بدون تغییر | بی‌محلی ۳۰ دقیقه: <span class="lib">energy -10</span></div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">transition smooth — بدون پرش ناگهانی</div>
+            <div class="item-note">از «ناراحت» مستقیم به «خوشحال» نره. باید از «آروم» رد بشه. یه تاریخچه ۵ حالته نگه دار برای انتقال طبیعی.</div>
+            <span class="chip chip-tip">💡 مثل آدم واقعی — حالت عوض بشه ولی فوری نه</span>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t1">۱.۴ — رفتار بیکار (Idle)</div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">یه thread جداگانه که هر ۳ تا ۸ دقیقه چک میکنه</div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">اگه کاربر ۲+ دقیقه حرف نزده، یه چیزی بگه<div class="item-note">خمیازه، نکته جالب، یه سوال، سکوت توصیف‌شده</div></div></div>
-        <div class="item"><div class="dot c1"></div><div class="item-text">احتمال سکوت هم باشه — همیشه حرف نزنه</div></div>
+        <div class="section-title t1"><span class="s-icon">💬</span>۱.۳ — سیستم پاسخ‌ها</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">دیکشنری پاسخ‌ها: <span class="lib">responses[topic][mood]</span></div>
+            <div class="item-note">هر topic (سلام، خداحافظ، تشکر، نمیدونم...) × هر mood = حداقل ۵ پاسخ مختلف. مجموعاً حدود ۳۰۰+ پاسخ منحصربه‌فرد هدف‌گذاری کن.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">سیستم ضد تکرار با sliding window</div>
+            <div class="item-note">آخرین ۳ پاسخ رو نگه دار. از <span class="lib">random.choice</span> استفاده کن ولی اگه انتخاب شده توی لیست بود، دوباره randomize کن. حداکثر ۳ بار تلاش.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">پاسخ‌های وضعیتی — با اطلاعات واقعی</div>
+            <div class="item-note">«ساعت چنده؟» → آلفا ساعت رو embed میکنه توی پاسخ. «حالت خوبه؟» → وضعیت mood واقعیش رو میگه. پاسخ‌های dynamic با <span class="lib">f-string</span></div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">پاسخ‌های زمینه‌دار — به پیام قبلی اشاره کنه</div>
+            <div class="item-note">اگه کاربر قبلاً گفت «خسته‌ام» و الان میگه «ممنون»، آلفا بتونه بگه «مطمئنی حالت بهتره؟» — contextual awareness ساده با last_topics[]</div>
+            <span class="chip chip-hard">⚠ کمی پیچیده — فاز بعدی بساز</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title t1"><span class="s-icon">⏸️</span>۱.۴ — رفتار بیکار (Idle Behavior)</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">thread مجزا برای مانیتور idle time</div>
+            <div class="item-note"><span class="lib">threading.Thread(daemon=True)</span> — هر ۳۰ ثانیه یه‌بار چک کنه. بعد از ۲ دقیقه سکوت، وارد idle mode بشه.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">رفتارهای idle با وزن‌دهی احتمال</div>
+            <div class="item-note">
+              ۳۵٪ — سکوت (هیچی نگه)<br>
+              ۲۵٪ — نکته جالب random<br>
+              ۲۰٪ — یه سوال کنجکاوانه از کاربر<br>
+              ۱۵٪ — خمیازه / توصیف حالت («داری خواب میبینم...»)<br>
+              ۵٪ — یه چیز کاملاً unexpected بگه
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c1"></div></div>
+          <div class="item-content">
+            <div class="item-text">زمان‌بندی هوشمند idle</div>
+            <div class="item-note">بعد از هر idle message، حداقل ۵ دقیقه صبر کنه. اگه کاربر جواب داد → idle counter reset. بین ساعت ۲–۶ صبح → idle کمتر (خواب‌آلوده)</div>
+            <span class="chip chip-tip">💡 آلفا نباید آزاردهنده باشه — از spam ایده‌آل‌ها پرهیز کن</span>
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
 
   <!-- ══ فاز ۲ ══ -->
-  <div class="phase" id="ph2">
+  <div class="phase ph2" id="ph2">
     <div class="phase-header" onclick="toggle('ph2')">
-      <div class="num c2">۲</div>
+      <div class="num c2" style="background: var(--p2);">۲</div>
       <div class="phase-info">
-        <div class="phase-title">حافظه — آلفا یادش میمونه</div>
-        <div class="phase-subtitle">ذخیره اطلاعات، یادگیری دستورات، شناخت کاربر</div>
+        <div class="phase-title">💾 حافظه — آلفا یادش میمونه</div>
+        <div class="phase-subtitle">ذخیره اطلاعات، یادگیری دستورات، شناخت عمیق کاربر</div>
       </div>
       <div class="phase-meta">
-        <span class="tag">JSON · فایل</span>
+        <span class="tag">JSON · SQLite</span>
+        <div class="phase-progress">
+          <div class="mini-bar"><div class="mini-fill" style="width: 0%; background: var(--p2);"></div></div>
+          <span>۰٪</span>
+        </div>
         <span class="chevron">▼</span>
       </div>
     </div>
     <div class="phase-body">
 
-      <div class="section">
-        <div class="section-title t2">۲.۱ — ساختار فایل حافظه</div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">فایل <span class="lib">alpha_memory.json</span> برای ذخیره همه اطلاعات</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">اطلاعات کاربر: اسم، ساعت معمول فعالیت، زبان ترجیحی</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">آمار: تعداد کل تعاملات، پرکاربردترین دستورات</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">دستورات یادگرفته شده از کاربر</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">ذخیره خودکار هر ۵ دقیقه و هنگام بستن برنامه</div></div>
+      <div class="phase-info-box">
+        <div class="info-stat">
+          <span class="info-stat-label">تخمین زمان</span>
+          <span class="info-stat-value">۲–۳ روز</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وابستگی</span>
+          <span class="info-stat-value">فاز ۱ کامل باشه</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">فایل اصلی</span>
+          <span class="info-stat-value" style="font-family: 'Space Mono', monospace; font-size: 12px;">alpha_memory.py</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وضعیت</span>
+          <span class="info-stat-value"><span class="chip chip-todo">○ در صف</span></span>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t2">۲.۲ — یادگیری دستورات جدید</div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">وقتی دستوری رو نفهمید، از کاربر بپرسه «میخوای یادم بدی؟»</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">کاربر یه trigger و یه action تعریف میکنه</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">دستورات یادگرفته شده توی JSON ذخیره میشن</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">دفعه بعد همون trigger رو بشنوه، action رو اجرا کنه</div></div>
+        <div class="section-title t2"><span class="s-icon">📁</span>۲.۱ — ساختار داده حافظه</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">ساختار JSON دو لایه: user profile + session data</div>
+            <div class="item-note">
+              <span class="lib">user_profile.json</span>: اسم، ساعت معمول، زبان، ترجیحات، آمار کلی<br>
+              <span class="lib">sessions.json</span>: هر session با timestamp، خلاصه مکالمه، mood غالب<br>
+              <span class="lib">commands.json</span>: دستورات یادگرفته با تعداد استفاده و آخرین استفاده
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">ذخیره‌سازی اتوماتیک با debounce</div>
+            <div class="item-note">نه هر بار — هر ۵ دقیقه یا بعد از هر ۱۰ تعامل. از <span class="lib">threading.Timer</span> استفاده کن. همچنین hook روی <span class="lib">atexit</span> برای ذخیره موقع بستن.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">backup اتوماتیک هفتگی</div>
+            <div class="item-note">یه نسخه فشرده از حافظه هر هفته بسازه: <span class="lib">memory_backup_YYYY-MM-DD.zip</span> — حداکثر ۴ هفته نگه داره.</div>
+            <span class="chip chip-tip">💡 یه روز ممنون میشی که این رو ساختی</span>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t2">۲.۳ — شناخت کاربر</div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">اولین بار اسم کاربر رو بپرسه و یادش بگیره</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">ساعت‌های فعالیت کاربر رو ثبت کنه</div></div>
-        <div class="item"><div class="dot c2"></div><div class="item-text">بعد از چند روز: «معمولاً این موقع بیداری» یا «امشب دیر کردی»</div></div>
+        <div class="section-title t2"><span class="s-icon">🎓</span>۲.۲ — یادگیری دستورات جدید</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">وقتی دستور ناشناخته: فلو یادگیری ۳ مرحله‌ای</div>
+            <div class="item-note">
+              ۱. «این دستور رو نشناختم. میخوای یادم بدی؟»<br>
+              ۲. کاربر trigger تعریف میکنه: «هر وقت گفتم X»<br>
+              ۳. کاربر action تعریف میکنه: «باید Y بکنی»<br>
+              بعدش: «باشه، یاد گرفتم! دفعه بعد امتحانش میکنم 🎉»
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">دستورات custom توی فایل مجزا</div>
+            <div class="item-note">ساختار: <span class="lib">{"trigger": ["کلمات ترایگر"], "action_type": "open_app|say|run_command", "action_data": "...", "use_count": 0}</span></div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">ویرایش و حذف دستورات یادگرفته</div>
+            <div class="item-note">«آلفا اون دستوری که یاد گرفتی برای X رو فراموش کن» — confirmation بخواد قبل از حذف.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title t2"><span class="s-icon">👤</span>۲.۳ — شناخت عمیق کاربر</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">پروفایل زمانی کاربر</div>
+            <div class="item-note">ثبت ساعت هر تعامل توی یه histogram 24 ساعته. بعد از ۷ روز، آلفا میدونه «معمولاً ساعت ۱۰ شب بیداری» و روی این اساس پیش‌بینی میکنه.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">تشخیص ناهنجاری در الگوها</div>
+            <div class="item-note">اگه کاربر ۲ ساعت زودتر یا دیرتر از معمول اومد: «امشب دیر کردی، همه چیز خوبه؟» یا «امروز زود بیداری — اتفاقی افتاده؟»</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c2"></div></div>
+          <div class="item-content">
+            <div class="item-text">ثبت ترجیحات ضمنی از رفتار</div>
+            <div class="item-note">اگه کاربر هر روز یوتیوب باز میکنه، آلفا بعد از ۵ روز می‌پرسه: «میخوای بذارم هر روز این موقع یوتیوب رو خودم باز کنم؟»</div>
+            <span class="chip chip-tip">💡 هوشمندی در جزئیات کوچیک خودش رو نشون میده</span>
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
 
   <!-- ══ فاز ۳ ══ -->
-  <div class="phase" id="ph3">
+  <div class="phase ph3" id="ph3">
     <div class="phase-header" onclick="toggle('ph3')">
-      <div class="num c3">۳</div>
+      <div class="num c3" style="background: var(--p3);">۳</div>
       <div class="phase-info">
-        <div class="phase-title">دستورات — آلفا کار میکنه</div>
-        <div class="phase-subtitle">اجرای دستورات سیستمی و هوشمند</div>
+        <div class="phase-title">⚡ دستورات — آلفا کار میکنه</div>
+        <div class="phase-subtitle">پردازش زبان طبیعی، کنترل سیستم، دستورات هوشمند</div>
       </div>
       <div class="phase-meta">
         <span class="tag">سیستم · Python</span>
+        <div class="phase-progress">
+          <div class="mini-bar"><div class="mini-fill" style="width: 0%; background: var(--p3);"></div></div>
+          <span>۰٪</span>
+        </div>
         <span class="chevron">▼</span>
       </div>
     </div>
     <div class="phase-body">
 
-      <div class="section">
-        <div class="section-title t3">۳.۱ — پردازش زبان طبیعی</div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">جستجوی کلیدواژه در متن دستور با <span class="lib">re</span> و <span class="lib">str.contains</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">پشتیبانی از چند شکل مختلف یه دستور: «باز کن»، «بازش کن»، «open»</div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">استخراج متغیر از دستور: «جستجو کن <span class="lib">[موضوع]</span>»</div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">دستورات ترکیبی: «صدا رو ببر بالا و یوتیوب رو باز کن»</div></div>
+      <div class="phase-info-box">
+        <div class="info-stat">
+          <span class="info-stat-label">تخمین زمان</span>
+          <span class="info-stat-value">۴–۶ روز</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وابستگی</span>
+          <span class="info-stat-value">فاز ۱ و ۲</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">فایل اصلی</span>
+          <span class="info-stat-value" style="font-family: 'Space Mono', monospace; font-size: 12px;">alpha_commands.py</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وضعیت</span>
+          <span class="info-stat-value"><span class="chip chip-todo">○ در صف</span></span>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t3">۳.۲ — کنترل سیستم</div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">زمان و تاریخ — <span class="lib">datetime</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">باتری، RAM، CPU — <span class="lib">psutil</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">کنترل صدا — <span class="lib">pycaw</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">قفل، خاموش، ریستارت — <span class="lib">os.system / ctypes</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">اسکرین‌شات — <span class="lib">pyautogui</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">باز کردن برنامه‌ها و وبسایت‌ها — <span class="lib">subprocess / webbrowser</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">کنترل پنجره‌ها — <span class="lib">pygetwindow</span></div></div>
+        <div class="section-title t3"><span class="s-icon">🔍</span>۳.۱ — پردازش زبان طبیعی (NLU)</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">سیستم intent detection با regex + keyword</div>
+            <div class="item-note">intent_map: یه dict بزرگ که برای هر intent، لیست patterns داره. <span class="lib">re.search(pattern, text.lower())</span> روی همه patterns. اولین match → intent.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">normalization فارسی قبل از parse</div>
+            <div class="item-note">ی/ک عربی → فارسی | اعداد فارسی → انگلیسی | «ب» و «بد» و «بده» همه → «باز کن» | نقطه‌گذاری حذف بشه</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">entity extraction با named groups</div>
+            <div class="item-note">مثال: <span class="lib">r'(?:جستجو|سرچ)\s+(?:کن|کنم)?\s*(?P&lt;query&gt;.+)'</span> → group('query') میشه search term. برای هر entity type یه pattern مجزا.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">دستورات ترکیبی با <span class="lib">re.split</span></div>
+            <div class="item-note">«صدا رو ببر بالا و اسپاتیفای رو باز کن» → split روی «و»، «بعد»، «سپس»، «همچنین» → اجرای sequential</div>
+            <span class="chip chip-hard">⚠ edge caseها زیاده — unit test بنویس</span>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t3">۳.۳ — دستورات هوشمند</div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">تایمر و یادآور با اعلان<div class="item-note">«۳۰ دقیقه دیگه یادم بنداز» — با <span class="lib">threading.Timer</span></div></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">خواندن آب‌وهوا از اینترنت — <span class="lib">requests + API</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">جستجوی گوگل — <span class="lib">webbrowser</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">خواندن کلیپ‌بورد و نوشتن روش — <span class="lib">pyperclip</span></div></div>
-        <div class="item"><div class="dot c3"></div><div class="item-text">نوشتن یادداشت سریع در فایل متنی</div></div>
+        <div class="section-title t3"><span class="s-icon">🖥️</span>۳.۲ — کنترل سیستم</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">مانیتورینگ سیستم با <span class="lib">psutil</span></div>
+            <div class="item-note">باتری: درصد + plugged? | RAM: used/total | CPU: per-core% + temp اگه ممکن بود | Disk: free space | همه رو cache کن — هر ۵ ثانیه refresh</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">کنترل صدا با <span class="lib">pycaw</span> + fallback</div>
+            <div class="item-note">اصلی: <span class="lib">pycaw</span> برای Windows Core Audio. اگه fail کرد: <span class="lib">subprocess + nircmd</span>. دستورات: set %, up/down %, mute toggle, get current</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">مدیریت پنجره‌ها با <span class="lib">pygetwindow</span></div>
+            <div class="item-note">لیست پنجره‌های باز | minimize/maximize/close | focus | جابجایی. آلفا باید بتونه بگه «الان چند تا پنجره بازه» و «Chrome رو minimize کن»</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">اسکرین‌شات هوشمند با <span class="lib">pyautogui</span></div>
+            <div class="item-note">اسکرین‌شات کل صفحه / پنجره فعال / یه ناحیه مشخص. ذخیره در Desktop/Screenshots/ با timestamp. اختیاری: copy to clipboard هم بکنه.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title t3"><span class="s-icon">🧩</span>۳.۳ — دستورات هوشمند</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">سیستم یادآور پیشرفته</div>
+            <div class="item-note">«۳۰ دقیقه دیگه یادم بنداز چای خوردم» → parse time + message → <span class="lib">threading.Timer</span> → notification + صدا. لیست reminders قابل مشاهده و لغو.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">آب‌وهوا با <span class="lib">Open-Meteo API</span> (رایگان)</div>
+            <div class="item-note">بار اول موقعیت رو تعیین کن (IP geolocation یا user input). Cache نتیجه برای ۳۰ دقیقه. پاسخ به فارسی: «امروز تهران ۲۸ درجه و آفتابیه ☀️»</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">یادداشت سریع با tagging</div>
+            <div class="item-note">«یادداشت: فردا باید X بکنم» → به <span class="lib">notes.json</span> اضافه بشه با timestamp. «یادداشت‌هام» → لیست کنه. «یادداشت‌های فردا» → filter بده.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c3"></div></div>
+          <div class="item-content">
+            <div class="item-text">calculator داخلی</div>
+            <div class="item-note">«۱۲۷ ضربدر ۳۸» → پارس کن → eval امن با <span class="lib">ast.literal_eval</span> (هیچ‌وقت eval مستقیم نه!) → جواب بده. از اعداد فارسی هم پشتیبانی کنه.</div>
+            <span class="chip chip-hard">⚠ هیچ‌وقت eval() مستقیم نه — امنیت!</span>
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
 
   <!-- ══ فاز ۴ ══ -->
-  <div class="phase" id="ph4">
+  <div class="phase ph4" id="ph4">
     <div class="phase-header" onclick="toggle('ph4')">
-      <div class="num c4">۴</div>
+      <div class="num c4" style="background: var(--p4);">۴</div>
       <div class="phase-info">
-        <div class="phase-title">رابط گرافیکی — ظاهر آلفا</div>
-        <div class="phase-subtitle">پنجره، چت، سیستم تری، دسکتاپ پت</div>
+        <div class="phase-title">🖼️ رابط گرافیکی — ظاهر آلفا</div>
+        <div class="phase-subtitle">پنجره چت، سیستم تری، VPet روی دسکتاپ</div>
       </div>
       <div class="phase-meta">
         <span class="tag">tkinter · PyQt5</span>
+        <div class="phase-progress">
+          <div class="mini-bar"><div class="mini-fill" style="width: 0%; background: var(--p4);"></div></div>
+          <span>۰٪</span>
+        </div>
         <span class="chevron">▼</span>
       </div>
     </div>
     <div class="phase-body">
 
-      <div class="section">
-        <div class="section-title t4">۴.۱ — پنجره اصلی چت</div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">پنجره تاریک با طراحی مینیمال</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">هدر: emoji حالت + اسم آلفا + وضعیت</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">نوار رنگی که با حالت احساسی تغییر میکنه</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">باکس چت: پیام‌های کاربر و آلفا با رنگ‌های متفاوت</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">فیلد ورودی + دکمه ارسال + Enter shortcut</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">دکمه‌های میانبر برای دستورات پرکاربرد</div></div>
+      <div class="phase-info-box">
+        <div class="info-stat">
+          <span class="info-stat-label">تخمین زمان</span>
+          <span class="info-stat-value">۵–۷ روز</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وابستگی</span>
+          <span class="info-stat-value">فاز ۱–۳ کامل</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">فایل اصلی</span>
+          <span class="info-stat-value" style="font-family: 'Space Mono', monospace; font-size: 12px;">alpha_gui.py</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وضعیت</span>
+          <span class="info-stat-value"><span class="chip chip-todo">○ در صف</span></span>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t4">۴.۲ — System Tray</div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">آیکون آلفا توی سینی ویندوز — <span class="lib">pystray</span></div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">کلیک روی آیکون: پنجره چت باز/بسته بشه</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">منوی راست‌کلیک: دستورات سریع بدون باز کردن پنجره</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">نمایش حالت احساسی آلفا روی آیکون</div></div>
+        <div class="section-title t4"><span class="s-icon">💬</span>۴.۱ — پنجره اصلی چت</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">طراحی تاریک با رنگ پویای mood</div>
+            <div class="item-note">یه نوار ۴px بالای پنجره که رنگش با mood عوض میشه + transition smooth 500ms. header: ایموجی mood + «آلفا» + وضعیت («در حال تایپ...»، «گوش میده»)</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">باکس چت با bubble‌های متمایز</div>
+            <div class="item-note">پیام کاربر: راست، رنگ روشن‌تر | پیام آلفا: چپ، رنگ تیره + ایموجی mood کوچیک | timestamp زیر هر پیام | scroll اتوماتیک به پایین</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">انیمیشن «در حال تایپ» واقع‌بینانه</div>
+            <div class="item-note">بعد از دریافت پیام، قبل از نمایش پاسخ: ۳ نقطه متحرک نمایش بده. تأخیر proportional به طول پاسخ (min 0.5s, max 2.5s).</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">دکمه‌های میانبر قابل شخصی‌سازی</div>
+            <div class="item-note">یه ردیف دکمه‌های کوچیک زیر فیلد ورودی: «ساعت»، «حالت»، «آب‌وهوا»، «یادداشت» — کاربر بتونه اضافه/حذف کنه از settings.</div>
+            <span class="chip chip-tip">💡 UX کلیدیه — مردم از shortcutها عاشق میشن</span>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t4">۴.۳ — اعلان‌های ویندوز</div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">اعلان برای رویدادهای مهم — <span class="lib">plyer / win10toast</span></div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">اعلان تایمر و یادآور</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">اعلان وقتی آلفا بیکار چیز جالبی پیدا کرده</div></div>
+        <div class="section-title t4"><span class="s-icon">🔔</span>۴.۲ — System Tray</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">آیکون پویا در سینی — با <span class="lib">pystray</span></div>
+            <div class="item-note">آیکون ۱۶×۱۶ یا ۳۲×۳۲ که رنگش با mood عوض میشه. با <span class="lib">PIL</span> آیکون رو runtime بساز. کلیک چپ: toggle پنجره | کلیک راست: منو</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">منوی راست‌کلیک هوشمند</div>
+            <div class="item-note">آخرین ۳ دستور پرکاربرد خودکار به منو اضافه بشن. + دستورات ثابت: «نمایش آلفا»، «تنظیمات»، «وضعیت سیستم»، «خروج»</div>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t4">۴.۴ — پنجره شناور روی دسکتاپ (مثل VPet)</div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">پنجره بدون کادر با <span class="lib">overrideredirect(True)</span></div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">پس‌زمینه شفاف با <span class="lib">wm_attributes('-transparentcolor')</span></div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">همیشه روی بقیه پنجره‌ها با <span class="lib">attributes('-topmost', True)</span></div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">قابل درگ: کاربر بتونه آلفا رو جابجا کنه</div></div>
-        <div class="item"><div class="dot c4"></div><div class="item-text">کلیک روی آلفا: پنجره چت باز بشه</div></div>
+        <div class="section-title t4"><span class="s-icon">🐾</span>۴.۳ — VPet روی دسکتاپ</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">پنجره شفاف بدون کادر</div>
+            <div class="item-note"><span class="lib">overrideredirect(True)</span> + <span class="lib">wm_attributes('-transparentcolor', 'white')</span> + <span class="lib">attributes('-topmost', True)</span> — در گوشه پایین‌راست صفحه spawn بشه</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">drag با mouse event</div>
+            <div class="item-note"><span class="lib">bind('&lt;B1-Motion&gt;')</span> برای drag. موقعیت آخر ذخیره بشه در config و دفعه بعد از همونجا spawn بشه.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">واکنش‌های کلیک</div>
+            <div class="item-note">کلیک چپ: پنجره چت باز بشه | کلیک راست: منوی سریع | double-click: آلفا یه چیز بگه / یه انیمیشن بده</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c4"></div></div>
+          <div class="item-content">
+            <div class="item-text">حباب گفتگوی pop-up</div>
+            <div class="item-note">وقتی آلفا چیزی برای گفتن داره (idle message، reminder)، یه حباب کوچیک کنار sprite ظاهر بشه → ۵ ثانیه بمونه → fade out</div>
+            <span class="chip chip-tip">💡 این feature آلفا رو «زنده» میکنه</span>
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
 
   <!-- ══ فاز ۵ ══ -->
-  <div class="phase" id="ph5">
+  <div class="phase ph5" id="ph5">
     <div class="phase-header" onclick="toggle('ph5')">
-      <div class="num c5">۵</div>
+      <div class="num c5" style="background: var(--p5);">۵</div>
       <div class="phase-info">
-        <div class="phase-title">صدا — آلفا حرف میزنه و میشنوه</div>
+        <div class="phase-title">🎙️ صدا — آلفا حرف میزنه و میشنوه</div>
         <div class="phase-subtitle">TTS فارسی، تشخیص صدا، wake word</div>
       </div>
       <div class="phase-meta">
         <span class="tag">vosk · pyttsx3</span>
+        <div class="phase-progress">
+          <div class="mini-bar"><div class="mini-fill" style="width: 0%; background: var(--p5);"></div></div>
+          <span>۰٪</span>
+        </div>
         <span class="chevron">▼</span>
       </div>
     </div>
     <div class="phase-body">
 
-      <div class="section">
-        <div class="section-title t5">۵.۱ — خروجی صدا (TTS)</div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">نصب و راه‌اندازی <span class="lib">pyttsx3</span> برای صدای آفلاین</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">جستجو برای صدای فارسی بین صداهای نصب‌شده ویندوز</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">سرعت و حجم صدا قابل تنظیم</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">صدا روی یه thread جدا اجرا بشه تا UI منجمد نشه</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">امکان قطع کردن صدا وسط حرف</div></div>
+      <div class="phase-info-box">
+        <div class="info-stat">
+          <span class="info-stat-label">تخمین زمان</span>
+          <span class="info-stat-value">۴–۵ روز</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وابستگی</span>
+          <span class="info-stat-value">فاز ۱–۴ کامل</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">فایل اصلی</span>
+          <span class="info-stat-value" style="font-family: 'Space Mono', monospace; font-size: 12px;">alpha_voice.py</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وضعیت</span>
+          <span class="info-stat-value"><span class="chip chip-todo">○ در صف</span></span>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t5">۵.۲ — ورودی صدا (STT)</div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">نصب مدل فارسی Vosk (آفلاین، بدون اینترنت)</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">ضبط مداوم صدا با <span class="lib">sounddevice</span></div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">تبدیل صدا به متن فارسی</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">فیلتر نویز و سکوت</div></div>
+        <div class="section-title t5"><span class="s-icon">🔊</span>۵.۱ — خروجی صدا (TTS)</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">راه‌اندازی <span class="lib">pyttsx3</span> با صدای فارسی</div>
+            <div class="item-note">لیست صداهای نصب‌شده → filter بر اساس «fa» یا «persian» → fallback به هر صدای موجود. سرعت: 150-180 WPM. pitch برای mood‌های مختلف فرق داشته باشه.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">اجرا در thread جدا با قابلیت interrupt</div>
+            <div class="item-note">یه <span class="lib">speech_queue</span> بساز. thread مجزا از queue میخونه و میگه. «stop» یا کلمه بیدارباش → <span class="lib">engine.stop()</span> → queue clear</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">صداهای سیستمی کوتاه</div>
+            <div class="item-note">برای رویدادها صداهای کوتاه با <span class="lib">winsound</span> یا <span class="lib">pygame.mixer</span>: تأیید دستور (beep)، خطا (buzz)، wake word شناخته شد (chime). فایل‌های wav کوچیک آفلاین.</div>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t5">۵.۳ — Wake Word (کلمه بیدارباش)</div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">گوش دادن مداوم در پس‌زمینه برای «آلفا»</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">وقتی «آلفا» شنید، وارد حالت فعال بشه</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">یه صدای کوتاه بده که فهمید داری صدایش میزنی</div></div>
-        <div class="item"><div class="dot c5"></div><div class="item-text">بعد ۱۰ ثانیه سکوت، برگرده به حالت گوش دادن</div></div>
+        <div class="section-title t5"><span class="s-icon">🎤</span>۵.۲ — ورودی صدا (STT)</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">Vosk آفلاین با مدل فارسی</div>
+            <div class="item-note">دانلود مدل: <span class="lib">vosk-model-fa-0.5</span> (~50MB). قرار دادن در <span class="lib">models/</span>. <span class="lib">KaldiRecognizer</span> با sample rate 16000. پردازش هر chunk 4096 frame</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">تشخیص سکوت برای پایان دستور</div>
+            <div class="item-note">اگه ۱.۵ ثانیه سکوت بود بعد از حرف زدن → متن رو confirm کن. از RMS energy برای تشخیص سکوت. visual indicator در UI که نشون بده داره گوش میده.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">فیلتر نویز محیطی</div>
+            <div class="item-note">اول ۲ ثانیه محیط رو calibrate کن. noise floor ذخیره بشه. هر chunk زیر threshold → skip. این باعث میشه آلفا با صدای پس‌زمینه فعال نشه.</div>
+            <span class="chip chip-hard">⚠ این بخش testing زیاد نیاز داره</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title t5"><span class="s-icon">👂</span>۵.۳ — Wake Word</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">تشخیص «آلفا» با fuzzy matching</div>
+            <div class="item-note">Vosk transcript رو چک کن برای: «آلفا»، «الفا»، «alfa»، «alpha» — از <span class="lib">difflib.SequenceMatcher</span> برای تشخیص شبیه‌ترین. threshold 0.75</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">حالت‌های listening: passive / active</div>
+            <div class="item-note">Passive: فقط wake word چک میشه (کم‌مصرف) | Active: بعد از شنیدن «آلفا»، ۱۰ ثانیه کامل گوش میده | بعد از ۱۰s سکوت → passive</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c5"></div></div>
+          <div class="item-content">
+            <div class="item-text">indicator بصری وضعیت listening</div>
+            <div class="item-note">در GUI: یه آیکون کوچیک — خاکستری (passive)، سبز چشمک‌زن (active listening)، آبی (در حال پردازش). در tray icon هم منعکس بشه.</div>
+            <span class="chip chip-tip">💡 کاربر باید بدونه آلفا داره گوش میده</span>
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
 
   <!-- ══ فاز ۶ ══ -->
-  <div class="phase" id="ph6">
+  <div class="phase ph6" id="ph6">
     <div class="phase-header" onclick="toggle('ph6')">
-      <div class="num c6">۶</div>
+      <div class="num c6" style="background: var(--p6);">۶</div>
       <div class="phase-info">
-        <div class="phase-title">روح — آلفا واقعاً زنده میشه</div>
-        <div class="phase-subtitle">انیمیشن، هوش مصنوعی واقعی، سیستم نیازها</div>
+        <div class="phase-title">✨ روح — آلفا واقعاً زنده میشه</div>
+        <div class="phase-subtitle">انیمیشن، هوش مصنوعی واقعی، سیستم نیازها، شخصی‌سازی کامل</div>
       </div>
       <div class="phase-meta">
-        <span class="tag">پیشرفته · API</span>
+        <span class="tag">پیشرفته · LLM</span>
+        <div class="phase-progress">
+          <div class="mini-bar"><div class="mini-fill" style="width: 0%; background: var(--p6);"></div></div>
+          <span>۰٪</span>
+        </div>
         <span class="chevron">▼</span>
       </div>
     </div>
     <div class="phase-body">
 
-      <div class="section">
-        <div class="section-title t6">۶.۱ — انیمیشن اسپرایت</div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">طراحی یا پیدا کردن sprite sheet برای آلفا</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">انیمیشن‌های مختلف: ایستاده، حرف زدن، خندیدن، خواب‌آلود</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">نمایش انیمیشن با <span class="lib">PIL/Pillow</span> روی canvas شفاف</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">انیمیشن متناسب با حالت احساسی عوض بشه</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">وقتی کاربر روش کلیک کرد، یه واکنش بده (سر نوازیدن)</div></div>
+      <div class="phase-info-box">
+        <div class="info-stat">
+          <span class="info-stat-label">تخمین زمان</span>
+          <span class="info-stat-value">۷–۱۴ روز</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وابستگی</span>
+          <span class="info-stat-value">همه فازها کامل</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">فایل اصلی</span>
+          <span class="info-stat-value" style="font-family: 'Space Mono', monospace; font-size: 12px;">alpha_soul.py</span>
+        </div>
+        <div class="info-stat">
+          <span class="info-stat-label">وضعیت</span>
+          <span class="info-stat-value"><span class="chip chip-todo">○ در صف</span></span>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t6">۶.۲ — اتصال به LLM</div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">اتصال به Claude API یا OpenAI برای مکالمه واقعی</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">system prompt که شخصیت آلفا رو تعریف میکنه</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">ارسال تاریخچه مکالمه برای حافظه کوتاه‌مدت</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">دستورات سیستمی هنوز آفلاین اجرا بشن (سریع‌ترن)</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">LLM فقط برای مکالمه آزاد و سوالات پیچیده</div></div>
+        <div class="section-title t6"><span class="s-icon">🎭</span>۶.۱ — انیمیشن اسپرایت</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">سیستم انیمیشن با <span class="lib">PIL/Pillow</span></div>
+            <div class="item-note">هر انیمیشن = لیست فریم‌ها + FPS + loop؟. کلاس <span class="lib">AnimationController</span> که بین انیمیشن‌ها switch کنه. هر mood یه set انیمیشن داره: idle, talk, react</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">انیمیشن‌های ضروری</div>
+            <div class="item-note">
+              <strong>idle:</strong> نفس کشیدن ملایم / چشم پلک زدن<br>
+              <strong>talking:</strong> دهن باز و بسته میشه<br>
+              <strong>happy:</strong> jump کوچیک / چشم‌های خندون<br>
+              <strong>sleepy:</strong> چشم‌های نیمه باز، حرکت کند<br>
+              <strong>petted:</strong> وقتی کلیک شد، یه واکنش شاد
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">جایی برای پیدا کردن sprite</div>
+            <div class="item-note">OpenGameArt.org | itch.io (پک‌های رایگان VTuber/mascot) | AI image gen برای prototype | یا PixelArt خودت بساز با Aseprite — سایز ۱۲۸×۱۲۸ یا ۲۵۶×۲۵۶</div>
+            <span class="chip chip-tip">💡 اول با placeholder شروع کن — بعداً sprite بهتر بذار</span>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t6">۶.۳ — سیستم نیازها (مثل Tamagotchi)</div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">نیازها: انرژی، خوشحالی، توجه — هر کدوم ۰ تا ۱۰۰</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">با گذر زمان کم میشن، با تعامل کاربر بالا میرن</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">وقتی نیازی پایینه، آلفا اشاره میکنه</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">نمایش بصری نیازها (نوارهای کوچیک یا آیکون)</div></div>
+        <div class="section-title t6"><span class="s-icon">🧠</span>۶.۲ — اتصال به LLM</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">System prompt که شخصیت آلفا رو تعریف میکنه</div>
+            <div class="item-note">اسم، جنسیت، لحن، ارزش‌ها، محدودیت‌ها، وضعیت فعلی (mood + time + last interaction). این prompt dynamically generate بشه بر اساس وضعیت فعلی آلفا.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">روتینگ هوشمند: LLM یا آفلاین؟</div>
+            <div class="item-note">اگه intent مشخص بود (open, set volume, timer...) → آفلاین سریع. اگه مکالمه آزاد، سوال، احساسی → LLM. این هم سرعت میده هم هزینه کم میکنه.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">مدیریت context window</div>
+            <div class="item-note">آخرین ۱۰ پیام رو به LLM بده. پیام‌های قدیمی‌تر رو summarize کن با یه LLM call جداگانه و summary رو به system prompt اضافه کن.</div>
+            <span class="chip chip-tip">💡 اینطوری آلفا «حافظه» داره ولی cost کنترله</span>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t6">۶.۴ — یادگیری از کاربر</div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">ثبت الگوهای روزانه کاربر: ساعت بیدار شدن، پرکاربردترین برنامه‌ها</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">پیش‌بینی نیازها: «معمولاً این موقع اسپاتیفای رو باز میکنی»</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">پیشنهاد پروآکتیو بر اساس تاریخچه</div></div>
+        <div class="section-title t6"><span class="s-icon">❤️</span>۶.۳ — سیستم نیازها (Tamagotchi)</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">سه نیاز اصلی با decay rate متفاوت</div>
+            <div class="item-note">
+              <strong>انرژی ⚡</strong>: هر ساعت -۳ | شارژ: کاربر بگه «استراحت کن» (+۲۰) یا شب +اتوماتیک<br>
+              <strong>خوشحالی 😊</strong>: هر ۲ ساعت -۵ | شارژ: تعامل مثبت (+۱۰), تعریف (+۱۵)<br>
+              <strong>توجه 👁</strong>: هر ۳۰ دقیقه -۸ | شارژ: هر پیام دریافتی (+۵)
+            </div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">رفتار بر اساس سطح نیاز</div>
+            <div class="item-note">۷۰-۱۰۰٪ → نرمال | ۴۰-۷۰٪ → کمی ذکر میکنه | ۲۰-۴۰٪ → بیشتر اشاره میکنه، mood تأثیر میگیره | زیر ۲۰٪ → تغییر رفتار واضح</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">نمایش بصری نیازها</div>
+            <div class="item-note">سه نوار کوچیک زیر sprite یا توی یه panel کوچیک. رنگ نوار: سبز → زرد → قرمز. hover روی نوار → tooltip با توضیح. مخفی‌شدنی باشه.</div>
+            <span class="chip chip-tip">💡 نباید مزاحم باشه — subtle ولی قابل دیدن</span>
+          </div>
+        </div>
       </div>
 
       <div class="section">
-        <div class="section-title t6">۶.۵ — شخصی‌سازی</div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">انتخاب اسم، جنسیت، و شخصیت آلفا توسط کاربر</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">آپلود اسپرایت سفارشی</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">تنظیم رنگ، زبان، و لحن</div></div>
-        <div class="item"><div class="dot c6"></div><div class="item-text">پنل تنظیمات گرافیکی</div></div>
+        <div class="section-title t6"><span class="s-icon">🔮</span>۶.۴ — یادگیری پیشرفته از کاربر</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">الگوهای روزانه با time-series ساده</div>
+            <div class="item-note">هر ساعت از روز، چه برنامه‌هایی باز شدن؟ بعد از ۱۴ روز → correlation بساز. «معمولاً ساعت ۹ شب وقتی یوتیوب بازه، Spotify هم بازه»</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">پیشنهاد پروآکتیو هوشمند</div>
+            <div class="item-note">فقط وقتی confidence بالاست پیشنهاد بده (>۸۵٪ occurrence). «سه‌شنبه‌هاست که این موقع Duolingo رو باز میکنی — میخوای خودم بازش کنم؟»</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title t6"><span class="s-icon">⚙️</span>۶.۵ — شخصی‌سازی کامل</div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">پنل تنظیمات گرافیکی کامل</div>
+            <div class="item-note">Tab‌ها: شخصیت | ظاهر | صدا | دستورات | حافظه | درباره. هر تغییر real-time اعمال بشه (live preview). ذخیره به <span class="lib">config.json</span></div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">سیستم theme کامل</div>
+            <div class="item-note">چند theme آماده: Dark (default)، Light، Neon، Pastel. کاربر رنگ accent رو هم تغییر بده. همه رنگ‌ها از config بخونه — هیچ چیزی hardcode نباشه.</div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="dot-wrap"><div class="dot c6"></div></div>
+          <div class="item-content">
+            <div class="item-text">import/export پروفایل</div>
+            <div class="item-note">کاربر بتونه کل تنظیمات + حافظه + دستورات یادگرفته رو export کنه به یه zip. روی کامپیوتر دیگه import کنه. آلفاش رو منتقل کنه.</div>
+            <span class="chip chip-tip">💡 این feature باعث میشه کاربرا به آلفا وابسته بشن</span>
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
 
+</div><!-- /phases -->
+
+<!-- ══ FOOTER ══ -->
+<div class="footer">
+  <div class="footer-status">ALPHA v2.0 · فاز ۱ فعال · کد alpha_core.py</div>
+  <div class="footer-credit">ساخته شده برای آلفا 💛 — هر روز یه قدم بزرگتر</div>
 </div>
 
-<div class="footer">
-  <div>🟢 فاز ۱ آماده‌ست — کد alpha_v2.py</div>
-  <div style="margin-top:8px; color:#333">ساخته شده برای آلفا 💛</div>
-</div>
+</div><!-- /wrapper -->
 
 <script>
 function toggle(id) {
   const el = document.getElementById(id);
   el.classList.toggle('open');
+  updateScrollBar();
 }
+
+function updateScrollBar() {
+  const phases = document.querySelectorAll('.phase');
+  let openCount = 0;
+  phases.forEach(p => { if (p.classList.contains('open')) openCount++; });
+  const pct = (openCount / phases.length) * 100;
+  document.getElementById('stickyFill').style.width = pct + '%';
+}
+
+// Scroll-based progress
+window.addEventListener('scroll', () => {
+  const total = document.body.scrollHeight - window.innerHeight;
+  if (total > 0) {
+    const pct = (window.scrollY / total) * 100;
+    document.getElementById('stickyFill').style.width = pct + '%';
+  }
+});
+
+// Init
+updateScrollBar();
 </script>
 </body>
 </html>
